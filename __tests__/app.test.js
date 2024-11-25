@@ -72,6 +72,17 @@ describe("GET /api/articles", () => {
         expect(response.body.msg).toBe('Bad request');
       });
   });
+  /*
+  test("GET:200 sends an array of articles to the client", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        console.log(articles)
+        //expect(articles).toEqual(endpointsJson);
+      });
+  });
+  */
 });
 
 //
