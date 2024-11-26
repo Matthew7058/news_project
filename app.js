@@ -5,7 +5,8 @@ const {
     getEndpoints,
     getTopics,
     getArticlesById,
-    getArticles
+    getArticles,
+    getCommentsByArticleId
   } = require('./controllers/news-controller');
 
 app.use(express.json());
@@ -14,6 +15,7 @@ app.get('/api', getEndpoints)
 app.get('/api/topics', getTopics)
 app.get('/api/articles/:article_id', getArticlesById)
 app.get('/api/articles', getArticles)
+app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
 
 app.use((err, req, res, next) => {
     // postgres errors
