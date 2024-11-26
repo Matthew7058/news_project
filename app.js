@@ -8,7 +8,9 @@ const {
     getArticles,
     getCommentsByArticleId,
     postComment,
-    patchArticleVotes
+    patchArticleVotes,
+    removeComment,
+    getCommentById
   } = require('./controllers/news-controller');
 const { handlePostgressErrors, handleCustomErrors } = require('./controllers/error-handler');
 
@@ -21,7 +23,8 @@ app.get('/api/articles', getArticles)
 app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
 app.post('/api/articles/:article_id/comments', postComment)
 app.patch('/api/articles/:article_id', patchArticleVotes)
-
+app.delete('/api/comments/:comment_id', removeComment)
+app.get('/api/comments/:comment_id', getCommentById)
 
 app.use(handlePostgressErrors)
 app.use(handleCustomErrors)
