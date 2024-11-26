@@ -93,7 +93,13 @@
           "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
         }
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes a comment from the database given the comment id",
+    "queries": ["comment_id"],
+    "exampleResponse": null
   }
 }
+
   
 

@@ -1,5 +1,5 @@
 const { selectArticleById, selectArticles, updateArticleVotes } = require('../models/articles-model.js');
-const { selectCommentCountByArticleId, selectCommentsByArticleId, insertComment } = require('../models/comments-model.js');
+const { selectCommentCountByArticleId, selectCommentsByArticleId, insertComment, deleteComment, selectCommentByCommentId } = require('../models/comments-model.js');
 const { displayEndpoints } = require('../models/endpoints-model.js');
 const { selectTopics } = require('../models/topics-model');
 const { selectUserByUsername } = require('../models/users-model.js');
@@ -85,3 +85,24 @@ const { selectUserByUsername } = require('../models/users-model.js');
     })
     .catch(next)
   }
+
+  exports.removeComment = (req, res, next) => {
+    const {comment_id} = req.params
+    selectCommentByCommentId(comment_id)
+    .then(() => {
+        return deleteComment(comment_id)
+    })
+    .then(() => {
+        res.status(204).send()
+    })
+    .catch(next);
+  }
+
+  exports.getCommentById = (req, res, next) => {
+    const {comment_id} = req.params
+    selectCommentByCommentId(comment_id)
+    .then((comment) => {
+        res.status(200).send(comment)
+    })
+    .catch(next);
+}
