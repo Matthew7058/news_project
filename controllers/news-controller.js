@@ -1,7 +1,8 @@
 const { selectArticleById, selectArticles } = require('../models/articles-model.js');
-const { selectCommentCountByArticleId, selectCommentsByArticleId } = require('../models/comments-model.js');
+const { selectCommentCountByArticleId, selectCommentsByArticleId, insertComment } = require('../models/comments-model.js');
 const { displayEndpoints } = require('../models/endpoints-model.js');
 const { selectTopics } = require('../models/topics-model');
+const { selectUserByUsername } = require('../models/users-model.js');
 
   exports.getEndpoints = (req, res, next) => {
     displayEndpoints().then((endpoints) => {
@@ -54,3 +55,20 @@ const { selectTopics } = require('../models/topics-model');
     })
     .catch(next);
   };
+
+  exports.postComment = (req, res, next) => {
+    const {article_id} = req.params
+    const {username, body} = req.body
+    selectArticleById(article_id)
+    .then(() => {
+        return selectUserByUsername(username)
+    })
+    .then(() => {
+        return insertComment({article_id, username, body})
+    })
+    .then((comment) => {
+        res.status(201).send({ comment });
+    })
+        
+    .catch(next)
+  }
