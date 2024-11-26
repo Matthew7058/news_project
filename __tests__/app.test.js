@@ -40,8 +40,7 @@ describe("GET /api/topics", () => {
   });
 });
 
-describe("GET /api/articles", () => {
-  // /api/articles/:article_id
+describe("GET /api/articles/:article_id", () => {
   test("GET 200: sends a single article to the client", () => {
     return request(app)
       .get("/api/articles/1")
@@ -74,8 +73,8 @@ describe("GET /api/articles", () => {
         expect(response.body.msg).toBe('Bad request');
       });
   });
-  
-  // /api/articles
+});
+describe("GET /api/articles", () => {
   test("GET:200 sends an array of articles to the client", () => {
     return request(app)
       .get("/api/articles")
@@ -93,8 +92,9 @@ describe("GET /api/articles", () => {
         });
       });
   });
+});
 
-  // /api/articles/:article_id/comments
+describe("GET /api/articles/:article_id/comments", () => {
   test("GET 200: sends an array of comments to the client", () => {
     return request(app)
       .get("/api/articles/3/comments")
@@ -146,6 +146,78 @@ describe("GET /api/articles", () => {
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe('Bad request');
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test('POST:201 inserts a new comment to the db and sends the new comment back to the client', () => {
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'cool story bro'
+    };
+    return request(app)
+      .post('/api/articles/3/comments')
+      .send(newComment)
+      .expect(201)
+      .then(({body: {comment}}) => {
+        expect(comment.comment_id).toBe(19)
+        expect(comment.body).toBe("cool story bro")
+        expect(comment.article_id).toBe(3)
+        expect(comment.author).toBe('butter_bridge')
+        expect(comment.votes).toBe(0)
+        expect(typeof comment.created_at).toBe("string")
+      });
+  });
+  test('POST:400 responds with an appropriate status and error message when provided with an invalid comment (no body)', () => {
+    const newComment = {
+      username: 'butter_bridge'
+    };
+    return request(app)
+      .post('/api/articles/3/comments')
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
+      });
+  });
+  test('POST:404 sends an appropriate status and error message when given a valid but non-existent article id', () => {
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'cool story bro'
+    };
+    return request(app)
+      .post('/api/articles/999/comments')
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('article does not exist');
+      });
+  });
+  test('POST:400 responds with an appropriate status and error message when provided with an empty body on comment', () => {
+    const newComment = {
+      username: 'butter_bridge',
+      body: ""
+    };
+    return request(app)
+      .post('/api/articles/3/comments')
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('comment is empty');
+      });
+  });
+  test('POST:404 sends an appropriate status and error message when given a valid but non-existent username', () => {
+    const newComment = {
+      username: 'john_pork',
+      body: 'cool story bro'
+    };
+    return request(app)
+      .post('/api/articles/3/comments')
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('user does not exist');
       });
   });
 });
