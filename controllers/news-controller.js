@@ -1,9 +1,10 @@
 const { selectArticleById, selectArticles } = require('../models/articles-model.js');
-const { getEndpoints } = require('../models/endpoints-model.js');
+const { selectCommentCountByArticleId } = require('../models/comments-model.js');
+const { displayEndpoints } = require('../models/endpoints-model.js');
 const { selectTopics } = require('../models/topics-model');
 
   exports.getEndpoints = (req, res, next) => {
-    getEndpoints().then((endpoints) => {
+    displayEndpoints().then((endpoints) => {
       res.status(200).send({ endpoints });
     });
   };
@@ -23,7 +24,18 @@ const { selectTopics } = require('../models/topics-model');
   };
 
   exports.getArticles = (req, res, next) => {
-    selectArticles().then((articles) => {
-      res.status(200).send({ articles });
-    });
+    selectArticles()
+    .then((articles) => {
+      const articlesWithCommentCount = articles.map((article) => {
+        return selectCommentCountByArticleId(article.article_id)
+        .then((commentCount) => {
+            article.comment_count = parseInt(commentCount.count);
+            return article;
+        })
+      })
+      return Promise.all(articlesWithCommentCount)
+    })
+    .then((articles) => {
+        res.status(200).send({ articles });
+    })
   };
