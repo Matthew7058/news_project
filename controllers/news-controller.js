@@ -1,47 +1,37 @@
-const { selectArticleById, selectArticles, updateArticleVotes } = require('../models/articles-model.js');
+const { selectArticleById, selectArticles, updateArticleVotes, selectArticlesWithCommentCount } = require('../models/articles-model.js');
 const { selectCommentCountByArticleId, selectCommentsByArticleId, insertComment, deleteComment, selectCommentByCommentId } = require('../models/comments-model.js');
 const { displayEndpoints } = require('../models/endpoints-model.js');
 const { selectTopics } = require('../models/topics-model');
-const { selectUserByUsername } = require('../models/users-model.js');
+const { selectUserByUsername, selectUsers } = require('../models/users-model.js');
 
-  exports.getEndpoints = (req, res, next) => {
+exports.getEndpoints = (req, res, next) => {
     displayEndpoints().then((endpoints) => {
       res.status(200).send({ endpoints });
     });
-  };
+};
 
-  exports.getTopics = (req, res, next) => {
+exports.getTopics = (req, res, next) => {
     selectTopics().then((topics) => {
       res.status(200).send({ topics });
     });
-  };
+};
 
-  exports.getArticlesById = (req, res, next) => {
+exports.getArticlesById = (req, res, next) => {
     const { article_id } = req.params;
     selectArticleById(article_id).then((article) => {
       res.status(200).send({ article });
     })
     .catch(next);
-  };
+};
 
-  exports.getArticles = (req, res, next) => {
-    selectArticles()
-    .then((articles) => {
-      const articlesWithCommentCount = articles.map((article) => {
-        return selectCommentCountByArticleId(article.article_id)
-        .then((commentCount) => {
-            article.comment_count = parseInt(commentCount.count);
-            return article;
-        })
-      })
-      return Promise.all(articlesWithCommentCount)
-    })
+exports.getArticles = (req, res, next) => {
+    selectArticlesWithCommentCount()
     .then((articles) => {
         res.status(200).send({ articles });
     })
-  };
+};
 
-  exports.getCommentsByArticleId = (req, res, next) => {
+exports.getCommentsByArticleId = (req, res, next) => {
     const { article_id } = req.params;
     const promises = [selectCommentsByArticleId(article_id)]
     
@@ -54,9 +44,9 @@ const { selectUserByUsername } = require('../models/users-model.js');
       res.status(200).send({ comments });
     })
     .catch(next);
-  };
+};
 
-  exports.postComment = (req, res, next) => {
+exports.postComment = (req, res, next) => {
     const {article_id} = req.params
     const {username, body} = req.body
     selectArticleById(article_id)
@@ -70,9 +60,9 @@ const { selectUserByUsername } = require('../models/users-model.js');
         res.status(201).send({ comment });
     }) 
     .catch(next)
-  }
+}
 
-  exports.patchArticleVotes = (req, res, next) => {
+exports.patchArticleVotes = (req, res, next) => {
     const {article_id} = req.params
     const {votes} = req.body
     
@@ -84,9 +74,9 @@ const { selectUserByUsername } = require('../models/users-model.js');
         res.status(200).send({article})
     })
     .catch(next)
-  }
+}
 
-  exports.removeComment = (req, res, next) => {
+exports.removeComment = (req, res, next) => {
     const {comment_id} = req.params
     selectCommentByCommentId(comment_id)
     .then(() => {
@@ -96,13 +86,20 @@ const { selectUserByUsername } = require('../models/users-model.js');
         res.status(204).send()
     })
     .catch(next);
-  }
+}
 
-  exports.getCommentById = (req, res, next) => {
+exports.getCommentById = (req, res, next) => {
     const {comment_id} = req.params
     selectCommentByCommentId(comment_id)
     .then((comment) => {
         res.status(200).send(comment)
     })
     .catch(next);
+}
+
+exports.getUsers = (req, res, next) => {
+    selectUsers()
+    .then((users) => {
+        res.status(200).send({users})
+    })
 }

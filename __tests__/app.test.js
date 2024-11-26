@@ -6,11 +6,11 @@ const app = require('../app');
 const request = require('supertest');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
-const { topicData, userData, articleData, commentData } = require("../db/data/test-data/index");
+const data = require("../db/data/test-data/index");
 
 /* Set up your beforeEach & afterAll functions here */
 
-beforeEach(() => seed({ topicData, userData, articleData, commentData }));
+beforeEach(() => seed(data));
 afterAll(() => db.end());
 
 describe("GET /api", () => {
@@ -323,4 +323,20 @@ describe("DELETE /api/comments/:comment_id", () => {
       });
   });
   
+});
+
+describe("GET /api/users", () => {
+  test("200: Responds with an object containing all users", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({body: {users}}) => {
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(typeof user.username).toBe('string');
+          expect(typeof user.name).toBe('string');
+          expect(typeof user.avatar_url).toBe('string');
+        });
+      });
+  });
 });

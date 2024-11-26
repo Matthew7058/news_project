@@ -18,6 +18,13 @@ exports.selectArticles = () => {
     });
 };
 
+exports.selectArticlesWithCommentCount = () => {
+    return db.query('SELECT articles.*, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.article_id;')
+    .then(({rows}) => {
+        return rows;
+      });
+}
+
 exports.updateArticleVotes = ({article_id, votes}) => {
     if (!Number.isInteger(votes)) {
         return Promise.reject({ status: 400, msg: 'Invalid votes value. Must be an integer.' });
