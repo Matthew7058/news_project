@@ -8,6 +8,9 @@ const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require("../db/data/test-data/index");
 
+const { toBeSortedBy } = require('jest-sorted');
+
+
 /* Set up your beforeEach & afterAll functions here */
 
 beforeEach(() => seed(data));
@@ -90,6 +93,62 @@ describe("GET /api/articles", () => {
           expect(typeof article.comment_count).toBe('number');
         });
       });
+  });
+  test("GET:200 check if response is sorted by created_at descending by default", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({body: {articles}}) => {
+        expect(articles.length).toBe(13);
+        const sortedArticles = [...articles].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        expect(articles).toEqual(sortedArticles)
+        //expect(articles).toBeSortedBy('created_at', { ascending: true })
+      });
+  });
+  test("GET:200 returns articles sorted by votes in ascending order when both sort_by and order are passed", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=asc")
+      .expect(200)
+      .then(({body: {articles}}) => {
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy('votes', { ascending: true });
+        //expect(articles).toBeSortedBy('created_at', { ascending: true })
+      });
+  });
+  test('GET 200: returns articles sorted by a valid column (e.g., votes)', () => {
+    return request(app)
+    .get('/api/articles?sort_by=votes')
+    .expect(200)
+    .then(({body: {articles}}) => {
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy('votes', { descending: true });
+    })
+  });
+
+  test('GET 200: returns articles ordered in ascending order when order=asc is passed', () => {
+    return request(app)
+    .get('/api/articles?order=asc')
+    .expect(200)
+    .then(({body: {articles}}) => {
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy('created_at', { ascending: true });
+    })
+  });
+  test('GET 400: responds with 400 for an invalid sort_by column', () => {
+    return request(app)
+    .get('/api/articles?sort_by=invalid_column')
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe('Invalid sort_by column');
+    })
+  });
+  test('GET 400: responds with 400 for an invalid order value', () => {
+    return request(app)
+    .get('/api/articles?order=invalid_order')
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe('Invalid order value');
+    })
   });
 });
 
