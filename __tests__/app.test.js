@@ -24,7 +24,6 @@ describe("GET /api", () => {
   });
 });
 
-
 describe("GET /api/topics", () => {
   test("200: Responds with an object containing the topics", () => {
     return request(app)
@@ -194,7 +193,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(response.body.msg).toBe('article does not exist');
       });
   });
-  test('POST:400 responds with an appropriate status and error message when provided with an empty body on comment', () => {
+  test('POST:204 responds with an appropriate status and error message when provided with an empty body on comment', () => {
     const newComment = {
       username: 'butter_bridge',
       body: ""
@@ -218,6 +217,77 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe('user does not exist');
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test('POST:200 updates votes on a given article when increasing the number of votes', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({votes: 10})
+      .expect(200)
+      .then(({body: {article}}) => {
+        expect(article.article_id).toBe(1);
+        expect(article.title).toBe("Living in the shadow of a great man");
+        expect(article.topic).toBe("mitch");
+        expect(article.author).toBe('butter_bridge');
+        expect(article.body).toBe('I find this existence challenging');
+        expect(article.created_at).toBe('2020-07-09T20:11:00.000Z');
+        expect(article.votes).toBe(110);
+        expect(article.article_img_url).toBe('https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700');
+      });
+  });
+  test('POST:200 updates votes on a given article when decreasing the number of votes', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({votes: -10})
+      .expect(200)
+      .then(({body: {article}}) => {
+        expect(article.article_id).toBe(1);
+        expect(article.title).toBe("Living in the shadow of a great man");
+        expect(article.topic).toBe("mitch");
+        expect(article.author).toBe('butter_bridge');
+        expect(article.body).toBe('I find this existence challenging');
+        expect(article.created_at).toBe('2020-07-09T20:11:00.000Z');
+        expect(article.votes).toBe(90);
+        expect(article.article_img_url).toBe('https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700');
+      });
+  });
+  test('GET:404 sends an appropriate status and error message when given a valid but non-existent id', () => {
+    return request(app)
+      .patch('/api/articles/999')
+      .send({votes: 10})
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('article does not exist');
+      });
+  });
+  test('GET:400 sends an appropriate status and error message when given an invalid id', () => {
+    return request(app)
+      .patch('/api/articles/not-an-article-id')
+      .send({votes: 10})
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
+      });
+  });
+  test('GET:400 sends an appropriate status and error message when votes are invalid', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({votes: "Ten"})
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Invalid votes value. Must be an integer.');
+      });
+  });
+  test('GET:400 sends an appropriate status and error message when votes are not passed', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({points: 10})
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Invalid votes value. Must be an integer.');
       });
   });
 });

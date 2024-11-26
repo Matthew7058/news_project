@@ -1,4 +1,4 @@
-const { selectArticleById, selectArticles } = require('../models/articles-model.js');
+const { selectArticleById, selectArticles, updateArticleVotes } = require('../models/articles-model.js');
 const { selectCommentCountByArticleId, selectCommentsByArticleId, insertComment } = require('../models/comments-model.js');
 const { displayEndpoints } = require('../models/endpoints-model.js');
 const { selectTopics } = require('../models/topics-model');
@@ -68,7 +68,20 @@ const { selectUserByUsername } = require('../models/users-model.js');
     })
     .then((comment) => {
         res.status(201).send({ comment });
+    }) 
+    .catch(next)
+  }
+
+  exports.patchArticleVotes = (req, res, next) => {
+    const {article_id} = req.params
+    const {votes} = req.body
+    
+    selectArticleById(article_id)
+    .then(() => {
+        return updateArticleVotes({article_id, votes})
     })
-        
+    .then((article) => {
+        res.status(200).send({article})
+    })
     .catch(next)
   }

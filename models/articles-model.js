@@ -16,4 +16,14 @@ exports.selectArticles = () => {
     return db.query('SELECT * FROM articles;').then((result) => {
       return result.rows;
     });
-  };
+};
+
+exports.updateArticleVotes = ({article_id, votes}) => {
+    if (!Number.isInteger(votes)) {
+        return Promise.reject({ status: 400, msg: 'Invalid votes value. Must be an integer.' });
+    }
+    return db.query('UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;', [votes, article_id])
+    .then(({rows}) => {
+        return rows[0]
+    })
+}
