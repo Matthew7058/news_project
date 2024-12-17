@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 
 const {
     getEndpoints,
@@ -14,7 +15,7 @@ const {
     getUsers
   } = require('./controllers/news-controller');
 const { handlePostgressErrors, handleCustomErrors } = require('./controllers/error-handler');
-
+app.use(cors());
 app.use(express.json());
 
 app.get('/api', getEndpoints)
